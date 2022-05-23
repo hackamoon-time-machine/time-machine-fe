@@ -1,16 +1,4 @@
-import {
-  Box,
-  Select,
-  Table,
-  Thead,
-  Tbody,
-  Tfoot,
-  Tr,
-  Th,
-  Td,
-  TableCaption,
-  TableContainer,
-} from '@chakra-ui/react';
+import { Box } from '@chakra-ui/react';
 import React from 'react';
 
 const Home = () => {
