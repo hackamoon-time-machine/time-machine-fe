@@ -1,0 +1,16 @@
+{
+    "extends": ["react-app", "plugin:prettier/recommended"],
+    "env": {
+      "es6": true,
+      "jest": true,
+      "browser": true
+    },
+    "globals": {
+      "process": true
+    },
+    "parser": "@babel/eslint-parser",
+    "parserOptions": {
+      "ecmaVersion": 2019,
+      "requireConfigFile": false
+    }
+  }
