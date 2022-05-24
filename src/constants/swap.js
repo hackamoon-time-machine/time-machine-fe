@@ -1,4 +1,4 @@
-export const swapEventABIInputs = [
+export const SWAP_EVENT_ABI_INPUTS = [
   {
     indexed: true,
     internalType: 'address',
@@ -37,7 +37,7 @@ export const swapEventABIInputs = [
   },
 ];
 
-export const getRateABI = {
+export const RATE_ABI = {
   inputs: [
     {
       internalType: 'contract IERC20',
@@ -67,6 +67,9 @@ export const getRateABI = {
   type: 'function',
 };
 
-export const tokenAddress = '0x85eac5ac2f758618dfa09bdbe0cf174e7d574d5b';
-export const usdtAddress = '0x55d398326f99059ff775485246999027b3197955';
-export const offChainAddress = '0xfbD61B037C325b959c0F6A7e69D8f37770C2c550';
+export const TOKEN_ADDRESS = '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c';
+export const USDT_ADDRESS = '0x55d398326f99059ff775485246999027b3197955';
+export const OFF_CHAIN_ADDRESS = '0xfbD61B037C325b959c0F6A7e69D8f37770C2c550';
+
+export const SELL = 'Sell';
+export const BUY = 'Buy';
