@@ -1,88 +1,23 @@
 import { Box } from '@chakra-ui/react';
 import { Web3Context } from 'contexts/Web3Provider';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { now, uniq } from 'lodash';
+import React, { useContext, useEffect, useState } from 'react';
+import { now } from 'lodash';
 import axios from 'axios';
-
-const swapEventABIInputs = [
-  {
-    indexed: true,
-    internalType: 'address',
-    name: 'sender',
-    type: 'address',
-  },
-  {
-    indexed: false,
-    internalType: 'uint256',
-    name: 'amount0In',
-    type: 'uint256',
-  },
-  {
-    indexed: false,
-    internalType: 'uint256',
-    name: 'amount1In',
-    type: 'uint256',
-  },
-  {
-    indexed: false,
-    internalType: 'uint256',
-    name: 'amount0Out',
-    type: 'uint256',
-  },
-  {
-    indexed: false,
-    internalType: 'uint256',
-    name: 'amount1Out',
-    type: 'uint256',
-  },
-  {
-    indexed: true,
-    internalType: 'address',
-    name: 'to',
-    type: 'address',
-  },
-];
-
-const getRateABI = {
-  inputs: [
-    {
-      internalType: 'contract IERC20',
-      name: 'srcToken',
-      type: 'address',
-    },
-    {
-      internalType: 'contract IERC20',
-      name: 'dstToken',
-      type: 'address',
-    },
-    {
-      internalType: 'bool',
-      name: 'useWrappers',
-      type: 'bool',
-    },
-  ],
-  name: 'getRate',
-  outputs: [
-    {
-      internalType: 'uint256',
-      name: 'weightedRate',
-      type: 'uint256',
-    },
-  ],
-  stateMutability: 'view',
-  type: 'function',
-};
-
-const tokenAddress = '0x85eac5ac2f758618dfa09bdbe0cf174e7d574d5b';
-const usdtAddress = '0x55d398326f99059ff775485246999027b3197955';
-const offChainAddress = '0xfbD61B037C325b959c0F6A7e69D8f37770C2c550';
+import {
+  swapEventABIInputs,
+  getRateABI,
+  tokenAddress,
+  usdtAddress,
+  offChainAddress,
+} from 'constants/swap';
 
 const Home = () => {
   const { web3 } = useContext(Web3Context);
   const [currentBlock, setCurrentBlock] = useState(0);
-  const [lastBlock, setLastBlock] = useState(18061820);
+  const [lastBlock, setLastBlock] = useState(18068559);
   const [data, setData] = useState([]);
   const [rate, setRate] = useState(0.0);
+  const [dataFormat, setDataFormat] = useState([]);
 
   useEffect(() => {
     if (currentBlock < lastBlock) {
@@ -103,25 +38,22 @@ const Home = () => {
 
       setLastBlock(currentBlock + 1);
       handleLogs(pastLogs);
-      const flushData = data;
+      const flushData = [...data];
       setData([]);
-      for (let i = 0; i < flushData.length; i++) {
-        const row = {};
-        row.caller = flushData[i].caller;
-        row.amount = flushData[i].amount;
-        if (row.amount < 0) {
-          row.type = 'sell';
-          row.amount = Math.abs(row.amount);
-        } else {
-          row.type = 'buy';
-        }
-        row.rate = rate;
-        row.value = row.amount * row.rate;
-        row.time = flushData[i].time;
-        row.txHash = flushData[i].txHash;
-        // TODO: process row
-        console.log('row:', row);
-      }
+
+      const newFormatData = flushData.map(e => {
+        return {
+          caller: e.caller,
+          amount: Math.abs(e.amount),
+          rate: rate,
+          time: e.time,
+          txHash: e.txHash,
+          value: e.amount * rate,
+          type: e.amount < 0 ? 'sell' : 'buy',
+        };
+      });
+
+      setDataFormat(prev => [...prev, ...newFormatData]);
     };
 
     fetchData();
@@ -177,6 +109,7 @@ const Home = () => {
     const url =
       'https://contract-info-dev.krystal.team/pool/bsc?addresses=' +
       pools.join(',');
+
     axios.get(url).then(res => {
       for (let i = 0; i < res.data.length; i++) {
         const pool = res.data[i];
@@ -215,8 +148,7 @@ const Home = () => {
     });
   }
 
-  console.log({ currentBlock, lastBlock });
-  return <Box p="6">{data.length}</Box>;
+  return <Box p="6">{dataFormat.length}</Box>;
 };
 
 export default Home;
