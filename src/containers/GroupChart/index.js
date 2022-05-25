@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useMemo } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import PieChart from 'containers/PieChart';
 import BarGroupChart from 'containers/BarChart';
 import { Box, Heading, Select, HStack } from '@chakra-ui/react';
@@ -10,15 +10,21 @@ import useGetMaxBlock from 'hooks/useGetMaxBlock';
 const GroupChart = () => {
   const { token } = useContext(TradesContext);
   const { lastBlock } = useGetMaxBlock();
+  const [dataSell, setDataSell] = useState();
+  const [dataBuy, setDataBuy] = useState();
+  const [dataPie, setDataPie] = useState({
+    totalBuy: 0,
+    totalSell: 0,
+  });
 
-  const query = useMemo(
-    () => ({
+  const getQueryByType = useCallback(
+    type => ({
       query: {
         bool: {
           filter: [
             {
               term: {
-                'BuyAddress.keyword': token,
+                [type]: token,
               },
             },
             {
@@ -44,9 +50,11 @@ const GroupChart = () => {
     [token, lastBlock]
   );
 
-  const handleGetDataSell = useCallback(() => {
-    axios
-      .post(
+  const handleGetData = useCallback(async () => {
+    const sellQuery = getQueryByType('SellAddress.keyword');
+    const buyQuery = getQueryByType('BuyAddress.keyword');
+    const [res1, res2] = await Promise.all([
+      axios.post(
         'https://time-machine.es.asia-southeast1.gcp.elastic-cloud.com:9243/swaps_new/_search',
         { ...query },
         {
@@ -55,14 +63,30 @@ const GroupChart = () => {
             password: 'nQV5AQb4xLKgkQk09WpVk3VX',
           },
         }
-      )
-      .then(res => console.log('data chart', res.data))
-      .catch(err => console.log('error in chart: ', err));
-  }, [query]);
+      ),
+      axios.post(
+        // 'https://time-machine.es.asia-southeast1.gcp.elastic-cloud.com:9243/swaps_new/_search',
+        'https://neproxy-dev.krystal.team/temp-es/swaps_new/_search',
+        { ...buyQuery },
+        {
+          auth: {
+            username: 'elastic',
+            password: 'nQV5AQb4xLKgkQk09WpVk3VX',
+          },
+        }
+      ),
+    ]);
+    if (res2.data.hits.total.value != 0 || res1.data.hits.total.value != 0) {
+      setDataPie({
+        totalBuy: res2.data.hits.total.value,
+        totalSell: res1.data.hits.total.value,
+      });
+    }
+  }, [getQueryByType]);
 
   useEffect(() => {
-    handleGetDataSell();
-  }, [handleGetDataSell]);
+    handleGetData();
+  }, [handleGetData]);
 
   return (
     <Box>
@@ -98,7 +122,7 @@ const GroupChart = () => {
         </Select>
       </HStack>
 
-      <PieChart />
+      <PieChart data={dataPie} />
       <BarGroupChart />
     </Box>
   );

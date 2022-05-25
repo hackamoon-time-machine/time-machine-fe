@@ -1,21 +1,25 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import 'chart.js/auto';
 import { Box } from '@chakra-ui/react';
 
-const PieChart = () => {
-  const data = {
-    labels: ['Red', 'Blue'],
-    datasets: [
-      {
-        label: 'My First Dataset',
-        data: [300, 50],
-        backgroundColor: ['#1DE9B6', '#FF6E40'],
-        borderColor: '#000',
-        hoverOffset: 4,
-      },
-    ],
-  };
+const PieChart = ({ data }) => {
+  const dataPie = useMemo(
+    () => ({
+      labels: ['Sell', 'Buy'],
+      datasets: [
+        {
+          label: 'My First Dataset',
+          data: [data?.totalBuy, data?.totalSell],
+          backgroundColor: ['#1DE9B6', '#FF6E40'],
+          borderColor: '#000',
+          hoverOffset: 4,
+        },
+      ],
+    }),
+    [data]
+  );
+
   const options = {
     plugins: {
       legend: {
@@ -32,23 +36,9 @@ const PieChart = () => {
     },
   };
 
-  // const totalComplete = () => <div style={{ color: '#fff' }}>hello</div>;
-  // const plugin = {
-  //   id: 'custom_canvas_background_image',
-  //   beforeDraw: chart => {
-  //     if (totalComplete) {
-  //       const ctx = chart.ctx;
-  //       const { top, left, width, height } = chart.chartArea;
-  //       const x = left + width / 2;
-  //       const y = top + height / 2;
-  //       ctx.draw(totalComplete, x, y);
-  //     }
-  //   },
-  // };
-
   return (
     <Box>
-      <Doughnut data={data} options={options} />;
+      <Doughnut data={dataPie} options={options} />;
     </Box>
   );
 };
