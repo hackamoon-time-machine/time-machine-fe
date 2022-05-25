@@ -50,47 +50,44 @@ const GroupChart = () => {
     [token, lastBlock]
   );
 
-  const handleGetDataSell = useCallback(() => {
-    const newQuery = getQueryByType('SellAddress.keyword');
+  const handleGetData = useCallback(async () => {
+    const sellQuery = getQueryByType('SellAddress.keyword');
+    const buyQuery = getQueryByType('BuyAddress.keyword');
+    const [res1, res2] = await Promise.all([
     axios
       .post(
         // 'https://time-machine.es.asia-southeast1.gcp.elastic-cloud.com:9243/swaps_new/_search',
         'https://neproxy-dev.krystal.team/temp-es/swaps_new/_search',
-        { ...newQuery },
+        { ...sellQuery},
         {
           auth: {
             username: 'elastic',
             password: 'nQV5AQb4xLKgkQk09WpVk3VX',
           },
         }
-      )
-      .then(res => {
-        setDataSell(res.data);
-      })
-      .catch(err => console.log('error in chart: ', err));
-  }, [getQueryByType]);
-
-  const handleGetDataBuy = useCallback(() => {
-    const newQuery = getQueryByType('BuyAddress.keyword');
-    axios
+      ),axios
       .post(
+        // 'https://time-machine.es.asia-southeast1.gcp.elastic-cloud.com:9243/swaps_new/_search',
         'https://neproxy-dev.krystal.team/temp-es/swaps_new/_search',
-        { ...newQuery },
+        { ...buyQuery },
         {
           auth: {
             username: 'elastic',
             password: 'nQV5AQb4xLKgkQk09WpVk3VX',
           },
         }
-      )
-      .then(res => setDataBuy(res.data))
-      .catch(err => console.log('error in chart: ', err));
+      )]);
+      if (res2.data.hits.total.value != 0 || res1.data.hits.total.value != 0) {
+        setDataPie({
+          totalBuy: res2.data.hits.total.value,
+          totalSell: res1.data.hits.total.value,
+        });
+      }
   }, [getQueryByType]);
 
   useEffect(() => {
-    handleGetDataSell();
-    handleGetDataBuy();
-  }, [handleGetDataSell, handleGetDataBuy]);
+    handleGetData();
+  }, [handleGetData]);
 
   return (
     <Box>
