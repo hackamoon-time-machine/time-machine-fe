@@ -17,15 +17,15 @@ export const OPTION_AMOUNT = [
 
 export const OPTION_TIME = [
   {
+    label: 'Last 1 hours',
+    value: '1h',
+  },
+  {
+    label: 'Last 1 days',
+    value: '1d',
+  },
+  {
     label: 'Last 7 days',
-    value: '7',
-  },
-  {
-    label: 'Last 30 days',
-    value: '30',
-  },
-  {
-    label: 'From begin',
-    value: '0',
+    value: '7d',
   },
 ];

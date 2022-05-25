@@ -5,7 +5,6 @@ import axios from 'axios';
 import {
   SWAP_EVENT_ABI_INPUTS,
   RATE_ABI,
-  TOKEN_ADDRESS,
   USDT_ADDRESS,
   OFF_CHAIN_ADDRESS,
   BUY,
@@ -13,14 +12,16 @@ import {
 } from 'constants/swap';
 import TableWrapper from 'components/Table';
 import { unionBy, uniq } from 'lodash';
+import { TradesContext } from 'contexts/Trades';
 
 const Trades = () => {
   const { web3 } = useContext(Web3Context);
   const [currentBlock, setCurrentBlock] = useState(0);
-  const [lastBlock, setLastBlock] = useState(18077054);
+  const [lastBlock, setLastBlock] = useState(18099031);
   const [data, setData] = useState([]);
   const [rate, setRate] = useState(0.0);
   const [dataFormat, setDataFormat] = useState([]);
+  const { token } = useContext(TradesContext);
 
   const handleLogs = useCallback(
     logs => {
@@ -51,10 +52,7 @@ const Trades = () => {
           for (let j = 0; j < swapEvents.length; j++) {
             const swapEvent = swapEvents[j];
             if (swapEvent.address.toLowerCase() === poolAddress.toLowerCase()) {
-              if (
-                pool.token0.address.toLowerCase() ===
-                TOKEN_ADDRESS.toLowerCase()
-              ) {
+              if (pool.token0.address.toLowerCase() === token.toLowerCase()) {
                 let newRow = {
                   amount:
                     (swapEvent.amount0Out - swapEvent.amount0In) /
@@ -67,10 +65,7 @@ const Trades = () => {
                 const updatedData = [...data, newRow];
                 setData(updatedData);
               }
-              if (
-                pool.token1.address.toLowerCase() ===
-                TOKEN_ADDRESS.toLowerCase()
-              ) {
+              if (pool.token1.address.toLowerCase() === token.toLowerCase()) {
                 let newRow = {
                   amount:
                     (swapEvent.amount1Out - swapEvent.amount1In) /
@@ -88,6 +83,7 @@ const Trades = () => {
         }
       });
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [data, web3.eth.abi]
   );
 
@@ -139,7 +135,7 @@ const Trades = () => {
 
     const getRate = async () => {
       const callData = web3.eth.abi.encodeFunctionCall(RATE_ABI, [
-        TOKEN_ADDRESS,
+        token,
         USDT_ADDRESS,
         false,
       ]);
@@ -159,9 +155,15 @@ const Trades = () => {
     return () => {
       clearInterval(intervalGetBlock);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [web3]);
 
-  console.log({ dataFormat });
+  //refresh data when change token
+  useEffect(() => {
+    setData([]);
+    setDataFormat([]);
+  }, [token]);
+
   return (
     <Box p="6" bg="dark.400" borderRadius="12px">
       <Heading as="h4" mb={4} color="white.200">
