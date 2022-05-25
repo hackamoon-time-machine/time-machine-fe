@@ -6,10 +6,10 @@ export const OPTION_AMOUNT = [
     label: 'TXMS',
     value: 'tmxs',
   },
-  {
-    label: 'Amount in USD',
-    value: 'usd',
-  },
+  // {
+  //   label: 'Amount in USD',
+  //   value: 'usd',
+  // },
   {
     label: 'Amount in Token',
     value: 'token',
@@ -19,14 +19,17 @@ export const OPTION_AMOUNT = [
 export const OPTION_TIME = [
   {
     label: 'Last 1 hours',
-    value: '1h',
+    value: 20 * 60,
   },
   {
     label: 'Last 1 days',
-    value: '1d',
+    value: 20 * 60 * 24,
   },
   {
     label: 'Last 7 days',
-    value: '7d',
+    value: 20 * 60 * 24 * 7,
   },
 ];
+
+export const SELL_KEY = 'BuyAddress.keyword';
+export const BUY_KEY = 'SellAddress.keyword';

@@ -4,11 +4,11 @@ import SearchBox from 'components/SearchBox';
 import InfoToken from 'components/InfoToken';
 import Trades from 'containers/Trades';
 import GroupChart from 'containers/GroupChart';
-import useWrapperRef from 'hooks/useWrapperRef';
 import useGetMaxBlock from 'hooks/useGetMaxBlock';
+import useWrapperRef from 'hooks/useWrapperRef';
 
 const Layouts = () => {
-  const { height, wrapperRef } = useWrapperRef(300);
+  const { wrapperRef, height } = useWrapperRef(300);
   const { lastBlock } = useGetMaxBlock();
   return (
     <Box p={4} bg="#20252C" ref={wrapperRef}>

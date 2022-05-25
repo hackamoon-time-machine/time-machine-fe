@@ -1,91 +1,115 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import PieChart from 'containers/PieChart';
 import BarGroupChart from 'containers/BarChart';
-import { Box, Heading, Select, HStack } from '@chakra-ui/react';
-import { OPTION_AMOUNT, OPTION_TIME } from 'constants/global';
+import { Box, Heading, Select, HStack, Button } from '@chakra-ui/react';
+import {
+  OPTION_AMOUNT,
+  OPTION_TIME,
+  SELL_KEY,
+  BUY_KEY,
+} from 'constants/global';
 import axios from 'axios';
 import { TradesContext } from 'contexts/Trades';
 import useGetMaxBlock from 'hooks/useGetMaxBlock';
+import { getQueryByType as getQueryByTypeUtil } from 'utils';
+
+const URL = 'https://neproxy-dev.krystal.team/temp-es/swaps_new/_search';
+// const URL2 =
+//   'https://time-machine.es.asia-southeast1.gcp.elastic-cloud.com:9243/swaps_new/_search';
 
 const GroupChart = () => {
   const { token } = useContext(TradesContext);
   const { lastBlock } = useGetMaxBlock();
+
+  const [params, setParams] = useState({
+    amount: OPTION_AMOUNT[0].value,
+    time: OPTION_TIME[0].value,
+  });
+
   const [dataPie, setDataPie] = useState({
     totalBuy: 0,
     totalSell: 0,
   });
 
   const getQueryByType = useCallback(
-    type => ({
-      query: {
-        bool: {
-          filter: [
-            {
-              term: {
-                [type]: token,
-              },
-            },
-            {
-              range: {
-                BlockNumber: {
-                  gte: lastBlock - 100000,
-                },
-              },
-            },
-          ],
-        },
-      },
-      size: 0,
-      track_total_hits: true,
-      aggs: {
-        top_buyers: {
-          terms: {
-            field: 'CallerAddress.keyword',
-          },
-        },
-      },
-    }),
-    [token, lastBlock]
+    type => {
+      return getQueryByTypeUtil(
+        type,
+        params.amount,
+        params.time,
+        lastBlock,
+        token
+      );
+    },
+    [params, lastBlock, token]
   );
 
   const handleGetData = useCallback(async () => {
     if (!lastBlock) {
       return;
     }
-    const sellQuery = getQueryByType('SellAddress.keyword');
-    const buyQuery = getQueryByType('BuyAddress.keyword');
-    const [res1, res2] = await Promise.all([
-      axios.post(
-        'https://time-machine.es.asia-southeast1.gcp.elastic-cloud.com:9243/swaps_new/_search',
-        { ...sellQuery },
-        {
-          auth: {
-            username: 'elastic',
-            password: 'nQV5AQb4xLKgkQk09WpVk3VX',
+    try {
+      const sellQuery = getQueryByType(SELL_KEY);
+      const buyQuery = getQueryByType(BUY_KEY);
+
+      const configAuth = {
+        auth: {
+          username: 'elastic',
+          password: 'nQV5AQb4xLKgkQk09WpVk3VX',
+        },
+      };
+      console.log('call');
+      const [res1, res2] = await Promise.all([
+        axios.post(
+          URL,
+          { ...sellQuery },
+          {
+            ...configAuth,
+          }
+        ),
+        axios.post(
+          URL,
+          { ...buyQuery },
+          {
+            ...configAuth,
+          }
+        ),
+      ]);
+
+      let listBuys = [];
+      if (params.amount !== 'token') {
+        const topBuyes = res2.data.aggregations.top_buyers.buckets.slice(0, 3);
+        const totalCountTop = topBuyes.reduce(
+          (acc, cur) => acc + cur.doc_count,
+          0
+        );
+
+        listBuys = [
+          ...topBuyes,
+          {
+            key: 'Other',
+            doc_count:
+              Number(res2.data.hits.total.value) - Number(totalCountTop),
           },
-        }
-      ),
-      axios.post(
-        // 'https://time-machine.es.asia-southeast1.gcp.elastic-cloud.com:9243/swaps_new/_search',
-        'https://neproxy-dev.krystal.team/temp-es/swaps_new/_search',
-        { ...buyQuery },
-        {
-          auth: {
-            username: 'elastic',
-            password: 'nQV5AQb4xLKgkQk09WpVk3VX',
-          },
-        }
-      ),
-    ]);
+        ];
+      }
+      setDataPie({
+        totalBuy:
+          params.amount !== 'token'
+            ? res2.data.hits.total.value
+            : res2.data.aggregations.total.value,
+        totalSell:
+          params.amount !== 'token'
+            ? res1.data.hits.total.value
+            : res1.data.aggregations.total.value,
+        listBuys,
+      });
+    } catch (e) {
+      console.log(e);
+    }
+  }, [getQueryByType, lastBlock, params.amount]);
 
-    setDataPie({
-      totalBuy: res2.data.hits.total.value,
-      totalSell: res1.data.hits.total.value,
-    });
-  }, [getQueryByType, lastBlock]);
-
-  console.log({ lastBlock });
-
+  // first call
   useEffect(() => {
     handleGetData();
   }, [handleGetData]);
@@ -100,7 +124,8 @@ const GroupChart = () => {
           placeholder="Select amount"
           borderRadius="12px"
           borderColor="#2F414F"
-          defaultValue={OPTION_AMOUNT[0].value}
+          value={params.amount}
+          onChange={e => setParams({ ...params, amount: e.target.value })}
         >
           {OPTION_AMOUNT.map(option => {
             return (
@@ -114,7 +139,10 @@ const GroupChart = () => {
           placeholder="Select time"
           borderRadius="12px"
           borderColor="#2F414F"
-          defaultValue={OPTION_TIME[0].value}
+          value={params.time}
+          onChange={e => {
+            setParams({ ...params, time: e.target.value });
+          }}
         >
           {OPTION_TIME.map(option => {
             return (
@@ -124,6 +152,9 @@ const GroupChart = () => {
             );
           })}
         </Select>
+        <Button color="#fff" bg="dark.500" p={4} onClick={handleGetData}>
+          Filter
+        </Button>
       </HStack>
 
       <PieChart data={dataPie} />

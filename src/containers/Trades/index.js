@@ -24,69 +24,77 @@ const Trades = ({ heightCustom, initLastBlock }) => {
 
   const handleLogs = useCallback(
     logs => {
-      // get pools, swapEvents
-      const pools = logs.map(log => log.address);
-      const swapEvents = logs.map(log => {
-        const swapEvent = web3.eth.abi.decodeLog(
-          SWAP_EVENT_ABI_INPUTS,
-          log.data,
-          log.topics.slice(1, 3)
-        );
+      try {
+        // get pools, swapEvents
+        const pools = logs.map(log => log.address);
+        const swapEvents = logs.map(log => {
+          const swapEvent = web3.eth.abi.decodeLog(
+            SWAP_EVENT_ABI_INPUTS,
+            log.data,
+            log.topics.slice(1, 3)
+          );
 
-        return {
-          address: log.address,
-          transactionHash: log.transactionHash,
-          uniqKey: `${log.transactionHash}-${log.logIndex}`,
-          ...swapEvent,
-        };
-      });
+          return {
+            address: log.address,
+            transactionHash: log.transactionHash,
+            uniqKey: `${log.transactionHash}-${log.logIndex}`,
+            ...swapEvent,
+          };
+        });
 
-      const url =
-        'https://contract-info-dev.krystal.team/pool/bsc?addresses=' +
-        uniq(pools).join(',');
+        const url =
+          'https://contract-info-dev.krystal.team/pool/bsc?addresses=' +
+          uniq(pools).join(',');
 
-      axios.get(url).then(res => {
-        for (let i = 0; i < res.data.length; i++) {
-          const pool = res.data[i];
-          const poolAddress = pool.address;
-          for (let j = 0; j < swapEvents.length; j++) {
-            const swapEvent = swapEvents[j];
-            if (swapEvent.address.toLowerCase() === poolAddress.toLowerCase()) {
+        axios.get(url).then(res => {
+          for (let i = 0; i < res.data.length; i++) {
+            const pool = res.data[i];
+            const poolAddress = pool.address;
+            for (let j = 0; j < swapEvents.length; j++) {
+              const swapEvent = swapEvents[j];
               if (
-                pool.token0.address.toLowerCase() === token.toLowerCase() ||
-                pool.token1.address.toLowerCase() === token.toLowerCase()
+                swapEvent.address.toLowerCase() === poolAddress.toLowerCase()
               ) {
-                let matchToken =
-                  pool.token0.address.toLowerCase() === token.toLowerCase()
-                    ? pool.token0
-                    : pool.token1;
-                web3.eth
-                  .getTransaction(swapEvent.transactionHash)
-                  .then(tx => {
-                    let newAmount =
-                      (swapEvent.amount1Out - swapEvent.amount1In) /
-                      Math.pow(10, matchToken.decimals);
+                if (
+                  pool.token0.address.toLowerCase() === token.toLowerCase() ||
+                  pool.token1.address.toLowerCase() === token.toLowerCase()
+                ) {
+                  let matchToken =
+                    pool.token0.address.toLowerCase() === token.toLowerCase()
+                      ? pool.token0
+                      : pool.token1;
+                  web3.eth
+                    .getTransaction(swapEvent.transactionHash)
+                    .then(tx => {
+                      let newAmount =
+                        (swapEvent.amount1Out - swapEvent.amount1In) /
+                        Math.pow(10, matchToken.decimals);
 
-                    let newRow = {
-                      amount: Math.abs(newAmount),
-                      value: Math.abs(newAmount) * rate,
-                      type: newAmount < 0 ? SELL : BUY,
-                      caller: tx.from,
-                      time: Date().toLocaleString(),
-                      txHash: swapEvent.transactionHash,
-                      uniqKey: swapEvent.uniqKey,
-                      rate,
-                    };
+                      let newRow = {
+                        amount: Math.abs(newAmount),
+                        value: Math.abs(newAmount) * rate,
+                        type: newAmount < 0 ? SELL : BUY,
+                        caller: tx.from,
+                        time: Date().toLocaleString(),
+                        txHash: swapEvent.transactionHash,
+                        uniqKey: swapEvent.uniqKey,
+                        rate,
+                      };
 
-                    // const updatedData = [newRow, ...data];
-                    setDataFormat(prev => uniqBy([newRow, ...prev], 'uniqKey'));
-                  })
-                  .catch(err => console.log('catch', err));
+                      // const updatedData = [newRow, ...data];
+                      setDataFormat(prev =>
+                        uniqBy([newRow, ...prev], 'uniqKey')
+                      );
+                    })
+                    .catch(err => console.log('catch', err));
+                }
               }
             }
           }
-        }
-      });
+        });
+      } catch (e) {
+        console.log(e);
+      }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [rate, web3.eth]
