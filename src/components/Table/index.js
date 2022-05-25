@@ -14,9 +14,9 @@ import { ExternalLinkIcon } from '@chakra-ui/icons';
 import { ellipsis } from 'utils';
 import { Link } from '@chakra-ui/react';
 
-const TableWrapper = ({ data }) => {
+const TableWrapper = ({ data, heightCustom }) => {
   return (
-    <TableContainer height={'800px'}>
+    <TableContainer height={heightCustom}>
       <Table size="sm" color="white.200">
         <Thead>
           <Tr>

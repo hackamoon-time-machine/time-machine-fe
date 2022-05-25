@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useMemo } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import PieChart from 'containers/PieChart';
 import BarGroupChart from 'containers/BarChart';
 import { Box, Heading, Select, HStack } from '@chakra-ui/react';
@@ -10,15 +10,21 @@ import useGetMaxBlock from 'hooks/useGetMaxBlock';
 const GroupChart = () => {
   const { token } = useContext(TradesContext);
   const { lastBlock } = useGetMaxBlock();
+  const [dataSell, setDataSell] = useState();
+  const [dataBuy, setDataBuy] = useState();
+  const [dataPie, setDataPie] = useState({
+    totalBuy: 0,
+    totalSell: 0,
+  });
 
-  const query = useMemo(
-    () => ({
+  const getQueryByType = useCallback(
+    type => ({
       query: {
         bool: {
           filter: [
             {
               term: {
-                'BuyAddress.keyword': token,
+                [type]: token,
               },
             },
             {
@@ -45,10 +51,12 @@ const GroupChart = () => {
   );
 
   const handleGetDataSell = useCallback(() => {
+    const newQuery = getQueryByType('SellAddress.keyword');
     axios
-      .get(
-        'https://time-machine.es.asia-southeast1.gcp.elastic-cloud.com:9243/swaps5/_search',
-        { ...query },
+      .post(
+        // 'https://time-machine.es.asia-southeast1.gcp.elastic-cloud.com:9243/swaps_new/_search',
+        'https://neproxy-dev.krystal.team/temp-es/swaps_new/_search',
+        { ...newQuery },
         {
           auth: {
             username: 'elastic',
@@ -56,13 +64,33 @@ const GroupChart = () => {
           },
         }
       )
-      .then(res => console.log('data chart', res.data))
+      .then(res => {
+        setDataSell(res.data);
+      })
       .catch(err => console.log('error in chart: ', err));
-  }, [query]);
+  }, [getQueryByType]);
+
+  const handleGetDataBuy = useCallback(() => {
+    const newQuery = getQueryByType('BuyAddress.keyword');
+    axios
+      .post(
+        'https://neproxy-dev.krystal.team/temp-es/swaps_new/_search',
+        { ...newQuery },
+        {
+          auth: {
+            username: 'elastic',
+            password: 'nQV5AQb4xLKgkQk09WpVk3VX',
+          },
+        }
+      )
+      .then(res => setDataBuy(res.data))
+      .catch(err => console.log('error in chart: ', err));
+  }, [getQueryByType]);
 
   useEffect(() => {
     handleGetDataSell();
-  }, [handleGetDataSell]);
+    handleGetDataBuy();
+  }, [handleGetDataSell, handleGetDataBuy]);
 
   return (
     <Box>
@@ -98,7 +126,7 @@ const GroupChart = () => {
         </Select>
       </HStack>
 
-      <PieChart />
+      <PieChart data={dataPie} />
       <BarGroupChart />
     </Box>
   );

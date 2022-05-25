@@ -4,10 +4,13 @@ import SearchBox from 'components/SearchBox';
 import InfoToken from 'components/InfoToken';
 import Trades from 'containers/Trades';
 import GroupChart from 'containers/GroupChart';
+import useWrapperRef from 'hooks/useWrapperRef';
 
 const Layouts = () => {
+  const { height, wrapperRef } = useWrapperRef(300);
+
   return (
-    <Box p={4} bg="#20252C">
+    <Box p={4} bg="#20252C" ref={wrapperRef}>
       <VStack spacing={6} align="stretch">
         <SearchBox />
         <Box>
@@ -15,7 +18,7 @@ const Layouts = () => {
             <Box w={{ base: '60%' }}>
               <VStack spacing={4} align="stretch">
                 <InfoToken />
-                <Trades />
+                <Trades heightCustom={height} />
               </VStack>
             </Box>
             <Box w={{ base: '40%' }} p={5} borderRadius="12px" bg="dark.400">

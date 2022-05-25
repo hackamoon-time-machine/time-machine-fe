@@ -14,7 +14,7 @@ import TableWrapper from 'components/Table';
 import { uniq, uniqBy } from 'lodash';
 import { TradesContext } from 'contexts/Trades';
 
-const Trades = () => {
+const Trades = ({ heightCustom }) => {
   const { web3 } = useContext(Web3Context);
   const [currentBlock, setCurrentBlock] = useState(0);
   const [lastBlock, setLastBlock] = useState(18099031);
@@ -169,7 +169,7 @@ const Trades = () => {
       <Heading as="h4" mb={4} color="white.200">
         TRADE HISTORY
       </Heading>
-      <TableWrapper data={dataFormat} />
+      <TableWrapper data={dataFormat} heightCustom={heightCustom} />
     </Box>
   );
 };
