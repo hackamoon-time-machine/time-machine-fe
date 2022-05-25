@@ -54,19 +54,17 @@ const GroupChart = () => {
     const sellQuery = getQueryByType('SellAddress.keyword');
     const buyQuery = getQueryByType('BuyAddress.keyword');
     const [res1, res2] = await Promise.all([
-    axios
-      .post(
-        // 'https://time-machine.es.asia-southeast1.gcp.elastic-cloud.com:9243/swaps_new/_search',
-        'https://neproxy-dev.krystal.team/temp-es/swaps_new/_search',
-        { ...sellQuery},
+      axios.post(
+        'https://time-machine.es.asia-southeast1.gcp.elastic-cloud.com:9243/swaps_new/_search',
+        { ...query },
         {
           auth: {
             username: 'elastic',
             password: 'nQV5AQb4xLKgkQk09WpVk3VX',
           },
         }
-      ),axios
-      .post(
+      ),
+      axios.post(
         // 'https://time-machine.es.asia-southeast1.gcp.elastic-cloud.com:9243/swaps_new/_search',
         'https://neproxy-dev.krystal.team/temp-es/swaps_new/_search',
         { ...buyQuery },
@@ -76,13 +74,14 @@ const GroupChart = () => {
             password: 'nQV5AQb4xLKgkQk09WpVk3VX',
           },
         }
-      )]);
-      if (res2.data.hits.total.value != 0 || res1.data.hits.total.value != 0) {
-        setDataPie({
-          totalBuy: res2.data.hits.total.value,
-          totalSell: res1.data.hits.total.value,
-        });
-      }
+      ),
+    ]);
+    if (res2.data.hits.total.value != 0 || res1.data.hits.total.value != 0) {
+      setDataPie({
+        totalBuy: res2.data.hits.total.value,
+        totalSell: res1.data.hits.total.value,
+      });
+    }
   }, [getQueryByType]);
 
   useEffect(() => {
