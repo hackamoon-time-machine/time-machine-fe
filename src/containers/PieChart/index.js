@@ -2,23 +2,47 @@ import React, { useMemo } from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import 'chart.js/auto';
 import { Box } from '@chakra-ui/react';
+import { ellipsis } from 'utils';
 
 const PieChart = ({ data }) => {
-  const dataPie = useMemo(
-    () => ({
+  const dataPie = useMemo(() => {
+    if (data?.listBuys?.length) {
+      return {
+        labels: [
+          'Sell',
+          ...data.listBuys.slice(0, 2).map(e => ellipsis(e.key)),
+          'Others',
+        ],
+        datasets: [
+          {
+            label: 'My First Dataset',
+            data: [data?.totalSell, ...data.listBuys.map(e => e.doc_count)],
+            backgroundColor: [
+              '#1DE9B6',
+              '#1bb486',
+              '#1de9b6',
+              '#74FEE7',
+              '#FF6E40',
+            ],
+            borderColor: '#000',
+            hoverOffset: 4,
+          },
+        ],
+      };
+    }
+    return {
       labels: ['Sell', 'Buy'],
       datasets: [
         {
           label: 'My First Dataset',
-          data: [data?.totalBuy, data?.totalSell],
+          data: [data?.totalSell, data?.totalBuy],
           backgroundColor: ['#1DE9B6', '#FF6E40'],
           borderColor: '#000',
           hoverOffset: 4,
         },
       ],
-    }),
-    [data]
-  );
+    };
+  }, [data]);
 
   const options = {
     plugins: {
@@ -33,6 +57,13 @@ const PieChart = ({ data }) => {
           color: '#D9D9D9',
         },
       },
+    },
+    chart: {
+      width: 200,
+    },
+    datalabels: {
+      display: true,
+      color: '#000',
     },
   };
 

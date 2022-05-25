@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   Table,
   Thead,
@@ -15,6 +15,10 @@ import { ellipsis } from 'utils';
 import { Link } from '@chakra-ui/react';
 
 const TableWrapper = ({ data, heightCustom }) => {
+  const sliceData = useMemo(() => {
+    return data.slice(0, 20) || [];
+  }, [data]);
+
   return (
     <TableContainer height={heightCustom}>
       <Table size="sm" color="white.200">
@@ -25,18 +29,18 @@ const TableWrapper = ({ data, heightCustom }) => {
             <Th>Price USD</Th>
             <Th>Rate</Th>
             <Th>Address</Th>
-            <Th>DATE</Th>
+            <Th>Date</Th>
           </Tr>
         </Thead>
         <Tbody>
-          {data.length === 0 && (
+          {sliceData.length === 0 && (
             <Tr>
               <Td colSpan={6} textAlign="center">
                 No data
               </Td>
             </Tr>
           )}
-          {data.map(e => {
+          {sliceData.map(e => {
             return (
               <Tr
                 key={e.uniqKey}
@@ -55,7 +59,7 @@ const TableWrapper = ({ data, heightCustom }) => {
                     {ellipsis(e.caller)} <ExternalLinkIcon mx="2px" />
                   </Link>
                 </Td>
-                <Td>{format(new Date(e.time), 'yyyy/MM/dd HH:mm')}</Td>
+                <Td>{format(new Date(e.time), 'yyyy/MM/dd HH:mm:ss')}</Td>
               </Tr>
             );
           })}
