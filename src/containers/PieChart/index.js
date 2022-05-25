@@ -3,6 +3,7 @@ import { Doughnut } from 'react-chartjs-2';
 import 'chart.js/auto';
 import { Box } from '@chakra-ui/react';
 import { ellipsis } from 'utils';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 const PieChart = ({ data }) => {
   const dataPie = useMemo(() => {
@@ -46,6 +47,12 @@ const PieChart = ({ data }) => {
 
   const options = {
     plugins: {
+      datalabels: {
+        formatter: function (value) {
+          return value;
+        },
+        color: '#ffffff',
+      },
       legend: {
         position: 'right',
         align: 'center',
@@ -61,15 +68,11 @@ const PieChart = ({ data }) => {
     chart: {
       width: 200,
     },
-    datalabels: {
-      display: true,
-      color: '#000',
-    },
   };
 
   return (
     <Box>
-      <Doughnut data={dataPie} options={options} />;
+      <Doughnut data={dataPie} plugins={[ChartDataLabels]} options={options} />;
     </Box>
   );
 };
