@@ -39,7 +39,7 @@ const TableWrapper = ({ data }) => {
           {data.map(e => {
             return (
               <Tr
-                key={e.txHash}
+                key={e.uniqKey}
                 color={e.type === BUY ? 'primary.100' : 'secondary.100'}
                 borderColor="darkblue.400"
               >

@@ -17,7 +17,7 @@ import { TradesContext } from 'contexts/Trades';
 const Trades = () => {
   const { web3 } = useContext(Web3Context);
   const [currentBlock, setCurrentBlock] = useState(0);
-  const [lastBlock, setLastBlock] = useState(18099031);
+  const [lastBlock, setLastBlock] = useState(18102782);
   const [data, setData] = useState([]);
   const [rate, setRate] = useState(0.0);
   const [dataFormat, setDataFormat] = useState([]);
@@ -39,6 +39,7 @@ const Trades = () => {
         swapEvent.address = log.address;
         pools.push(log.address);
         swapEvent.transactionHash = log.transactionHash;
+        swapEvent.uniqKey = `${log.transactionHash}-${log.logIndex}`;
         swapEvents.push(swapEvent);
       }
       const url =
@@ -53,30 +54,42 @@ const Trades = () => {
             const swapEvent = swapEvents[j];
             if (swapEvent.address.toLowerCase() === poolAddress.toLowerCase()) {
               if (pool.token0.address.toLowerCase() === token.toLowerCase()) {
-                let newRow = {
-                  amount:
-                    (swapEvent.amount0Out - swapEvent.amount0In) /
-                    Math.pow(10, pool.token0.decimals),
-                  caller: swapEvent.sender,
-                  time: Date().toLocaleString(),
-                  txHash: swapEvent.transactionHash,
-                };
+                web3.eth.getTransaction(swapEvent.transactionHash).then(tx => {
+                  console.log('caller:', tx.from);
+                  let newRow = {
+                    amount:
+                      (swapEvent.amount0Out - swapEvent.amount0In) /
+                      Math.pow(10, pool.token0.decimals),
+                    caller: tx.from,
+                    time: Date().toLocaleString(),
+                    txHash: swapEvent.transactionHash,
+                    uniqKey: swapEvent.uniqKey,
+                  };
 
-                const updatedData = [newRow, ...data];
-                setData(updatedData);
+                  // const updatedData = [newRow, ...data];
+                  setData(prevData => {
+                    return [...prevData, newRow];
+                  });
+                });
               }
               if (pool.token1.address.toLowerCase() === token.toLowerCase()) {
-                let newRow = {
-                  amount:
-                    (swapEvent.amount1Out - swapEvent.amount1In) /
-                    Math.pow(10, pool.token1.decimals),
-                  caller: swapEvent.sender,
-                  time: Date().toLocaleString(),
-                  txHash: swapEvent.transactionHash,
-                };
+                web3.eth.getTransaction(swapEvent.transactionHash).then(tx => {
+                  console.log('caller:', tx.from);
+                  let newRow = {
+                    amount:
+                      (swapEvent.amount1Out - swapEvent.amount1In) /
+                      Math.pow(10, pool.token1.decimals),
+                    caller: tx.from,
+                    time: Date().toLocaleString(),
+                    txHash: swapEvent.transactionHash,
+                    uniqKey: swapEvent.uniqKey,
+                  };
 
-                const updatedData = [newRow, ...data];
-                setData(updatedData);
+                  // const updatedData = [newRow, ...data];
+                  setData(prevData => {
+                    return [...prevData, newRow];
+                  });
+                });
               }
             }
           }
@@ -118,10 +131,11 @@ const Trades = () => {
           txHash: e.txHash,
           value: Math.abs(e.amount) * rate,
           type: e.amount < 0 ? SELL : BUY,
+          uniqKey: e.uniqKey,
         };
       });
 
-      setDataFormat(prev => uniqBy([...newFormatData, ...prev], 'txHash'));
+      setDataFormat(prev => uniqBy([...newFormatData, ...prev], 'uniqKey'));
     };
 
     fetchData();

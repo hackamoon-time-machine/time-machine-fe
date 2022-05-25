@@ -46,8 +46,8 @@ const GroupChart = () => {
 
   const handleGetDataSell = useCallback(() => {
     axios
-      .get(
-        'https://time-machine.es.asia-southeast1.gcp.elastic-cloud.com:9243/swaps5/_search',
+      .post(
+        'https://time-machine.es.asia-southeast1.gcp.elastic-cloud.com:9243/swaps_new/_search',
         { ...query },
         {
           auth: {

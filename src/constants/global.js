@@ -1,4 +1,5 @@
-export const PROVIDER_URL = 'https://bsc-dataseed.binance.org/';
+// export const PROVIDER_URL = 'https://bsc-dataseed.binance.org/';
+export const PROVIDER_URL = 'https://neproxy-dev.krystal.team/neproxy/bsc';
 
 export const OPTION_AMOUNT = [
   {
