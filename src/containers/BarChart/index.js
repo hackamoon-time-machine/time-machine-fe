@@ -6,18 +6,29 @@ import 'chart.js/auto';
 const BarGroupChart = () => {
   const options = {
     plugins: {
-      title: {
-        display: true,
-        text: 'Table title',
+      legend: {
+        display: false,
       },
     },
     responsive: true,
     scales: {
       x: {
         stacked: true,
+        grid: {},
       },
       y: {
         stacked: true,
+        grid: {
+          color: '#41596C',
+          drawBorder: true,
+          drawOnChartArea: true,
+        },
+        ticks: {
+          count: 6,
+        },
+        pointLabels: {
+          color: '#fff',
+        },
       },
     },
   };
@@ -36,16 +47,16 @@ const BarGroupChart = () => {
     labels,
     datasets: [
       {
-        label: 'Dataset 1',
-        data: labels.map(() => Math.random(0, 20)),
-        backgroundColor: '#FF6E40',
-        stack: 'Stack 0',
-      },
-      {
         label: 'Dataset 3',
         data: labels.map(() => Math.random(0, 20)),
         backgroundColor: '#1DE9B6',
         stack: 'Stack 1',
+      },
+      {
+        label: 'Dataset 1',
+        data: labels.map(() => Math.random(0, 20)),
+        backgroundColor: '#FF6E40',
+        stack: 'Stack 0',
       },
     ],
   };

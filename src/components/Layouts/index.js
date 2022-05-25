@@ -11,19 +11,14 @@ const Layouts = () => {
       <VStack spacing={6} align="stretch">
         <SearchBox />
         <Box>
-          <Stack direction={{ base: 'column', sm: 'row' }} spacing={8} px={6}>
-            <Box w={{ base: '60%', md: '100%' }}>
+          <Stack direction={{ base: 'column', md: 'row' }} spacing={8} px={6}>
+            <Box w={{ base: '60%' }}>
               <VStack spacing={4} align="stretch">
                 <InfoToken />
                 <Trades />
               </VStack>
             </Box>
-            <Box
-              w={{ base: '40%', md: '100%' }}
-              p={5}
-              borderRadius="12px"
-              bg="dark.400"
-            >
+            <Box w={{ base: '40%' }} p={5} borderRadius="12px" bg="dark.400">
               <GroupChart />
             </Box>
           </Stack>

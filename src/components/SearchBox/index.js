@@ -1,9 +1,14 @@
-import React from 'react';
+import React, { useContext, useState } from 'react';
 
-import { Box, Input, InputGroup, InputLeftElement } from '@chakra-ui/react';
+import { Box, Input, InputGroup, InputRightElement } from '@chakra-ui/react';
 import { Search2Icon } from '@chakra-ui/icons';
+import { TradesContext } from 'contexts/Trades';
 
 const SearchBox = () => {
+  const { setToken } = useContext(TradesContext);
+
+  const [textSearch, setTextSearch] = useState('');
+
   return (
     <Box px={6}>
       <InputGroup
@@ -12,15 +17,20 @@ const SearchBox = () => {
         bg="dark.500"
         borderColor="dark.500"
       >
-        <InputLeftElement pointerEvents="none">
+        <InputRightElement
+          cursor="pointer"
+          onClick={() => setToken(textSearch)}
+        >
           <Search2Icon color="#fff" />
-        </InputLeftElement>
+        </InputRightElement>
 
         <Input
           type="text"
           borderRadius="19px"
           color="#fff"
           placeholder="Search by token"
+          value={textSearch}
+          onChange={e => setTextSearch(e.target.value)}
         />
       </InputGroup>
     </Box>

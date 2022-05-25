@@ -1,13 +1,11 @@
-import React from 'react';
+import React, { useContext } from 'react';
 
 import { Box, Flex, HStack, Text } from '@chakra-ui/react';
+import { TradesContext } from 'contexts/Trades';
 
 const InfoToken = () => {
-  const info = {
-    symbol: 'OXFE',
-    name: 'Atoine',
-    address: '0xfe56d5892BDffC7BF58f2E84BE1b2C32D21C308b',
-  };
+  const { infoToken } = useContext(TradesContext);
+
   const styleInfo = {
     borderColor: 'darkblue.500',
     bg: 'dark.500',
@@ -22,31 +20,31 @@ const InfoToken = () => {
       <HStack spacing={4}>
         <Box w="25%" {...styleInfo}>
           <Flex>
-            <Text color="white.200" w="100px">
+            <Text color="white.200" mr="3">
               Symbol:
             </Text>
-            <Text noOfLines={1} title={info.symbol} color="dark.100">
-              {info.symbol}
+            <Text noOfLines={1} title={infoToken.symbol} color="dark.100">
+              {infoToken.symbol}
             </Text>
           </Flex>
         </Box>
         <Box w="25%" {...styleInfo}>
           <Flex>
-            <Text color="white.200" w="100px">
+            <Text color="white.200" mr="3">
               Name:
             </Text>
-            <Text noOfLines={1} title={info.name} color="dark.100">
-              {info.name}
+            <Text noOfLines={1} title={infoToken.name} color="dark.100">
+              {infoToken.name}
             </Text>
           </Flex>
         </Box>
         <Box w="50%" {...styleInfo}>
           <Flex>
-            <Text color="white.200" w="100px">
+            <Text color="white.200" mr="3">
               Address:
             </Text>
-            <Text noOfLines={1} title={info.address} color="dark.100">
-              {info.address}
+            <Text noOfLines={1} title={infoToken.address} color="dark.100">
+              {infoToken.address}
             </Text>
           </Flex>
         </Box>
