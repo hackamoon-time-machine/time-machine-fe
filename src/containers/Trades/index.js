@@ -11,7 +11,7 @@ import {
   SELL,
 } from 'constants/swap';
 import TableWrapper from 'components/Table';
-import { unionBy, uniq } from 'lodash';
+import { uniq, uniqBy } from 'lodash';
 import { TradesContext } from 'contexts/Trades';
 
 const Trades = () => {
@@ -62,7 +62,7 @@ const Trades = () => {
                   txHash: swapEvent.transactionHash,
                 };
 
-                const updatedData = [...data, newRow];
+                const updatedData = [newRow, ...data];
                 setData(updatedData);
               }
               if (pool.token1.address.toLowerCase() === token.toLowerCase()) {
@@ -75,7 +75,7 @@ const Trades = () => {
                   txHash: swapEvent.transactionHash,
                 };
 
-                const updatedData = [...data, newRow];
+                const updatedData = [newRow, ...data];
                 setData(updatedData);
               }
             }
@@ -121,7 +121,7 @@ const Trades = () => {
         };
       });
 
-      setDataFormat(prev => unionBy([...newFormatData, ...prev], 'txHash'));
+      setDataFormat(prev => uniqBy([...newFormatData, ...prev], 'txHash'));
     };
 
     fetchData();
