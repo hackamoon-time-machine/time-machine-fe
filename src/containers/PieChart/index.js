@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import 'chart.js/auto';
-import { Box, Tag, Text, HStack } from '@chakra-ui/react';
+import { Box, Tag, HStack } from '@chakra-ui/react';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 const PieChart = ({ data }) => {
@@ -33,7 +33,6 @@ const PieChart = ({ data }) => {
           return `${show.toFixed(3)}%`;
         },
         color: '#141D24',
-        opacity: '0.8',
         borderRadius: '6',
         font: {
           weight: '500',
@@ -69,21 +68,15 @@ const PieChart = ({ data }) => {
         </Box>
         {data.topBuy && data.topSell && (
           <Box>
-            <Box mb="4" mr={4}>
+            <Box mb="4" mr={4} display="flex" flexWrap="wrap">
               <Tag bg="#1DE9B6" color="#141D24">
-                Top Buyer
+                Top Buyer: {data.topBuy}
               </Tag>
-              <Text textAlign="center" color="#fff" fontSize="14px">
-                {data.topBuy}
-              </Text>
             </Box>
-            <Box>
-              <Tag bg="#FF6E40" color="#141D24">
-                Top Seller
+            <Box display="flex" flexWrap="wrap">
+              <Tag bg="#FF6E40" color="#141D24" mr="3">
+                Top Seller: {data.topSell}
               </Tag>
-              <Text textAlign="center" color="#fff" fontSize="14px">
-                {data.topSell}
-              </Text>
             </Box>
           </Box>
         )}

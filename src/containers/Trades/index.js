@@ -147,7 +147,7 @@ const Trades = ({ heightCustom, initLastBlock }) => {
     const intervalGetBlock = setInterval(() => {
       getLastBlock();
       getRate();
-    }, 3000);
+    }, 1000);
 
     return () => {
       clearInterval(intervalGetBlock);
