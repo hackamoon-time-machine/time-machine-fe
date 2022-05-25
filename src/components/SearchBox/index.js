@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 
 import { Box, Input, InputGroup, InputRightElement } from '@chakra-ui/react';
 import { Search2Icon } from '@chakra-ui/icons';
@@ -8,6 +8,15 @@ const SearchBox = () => {
   const { setToken } = useContext(TradesContext);
 
   const [textSearch, setTextSearch] = useState('');
+
+  const handleKeyPress = useCallback(
+    event => {
+      if (event.keyCode === 13 || event.charCode === 13) {
+        setToken(textSearch);
+      }
+    },
+    [setToken, textSearch]
+  );
 
   return (
     <Box px={6}>
@@ -30,6 +39,7 @@ const SearchBox = () => {
           color="#fff"
           placeholder="Search by token"
           value={textSearch}
+          onKeyPress={handleKeyPress}
           onChange={e => setTextSearch(e.target.value)}
         />
       </InputGroup>

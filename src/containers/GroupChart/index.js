@@ -10,8 +10,6 @@ import useGetMaxBlock from 'hooks/useGetMaxBlock';
 const GroupChart = () => {
   const { token } = useContext(TradesContext);
   const { lastBlock } = useGetMaxBlock();
-  const [dataSell, setDataSell] = useState();
-  const [dataBuy, setDataBuy] = useState();
   const [dataPie, setDataPie] = useState({
     totalBuy: 0,
     totalSell: 0,
@@ -30,7 +28,7 @@ const GroupChart = () => {
             {
               range: {
                 BlockNumber: {
-                  gte: lastBlock - 20 * 60,
+                  gte: lastBlock - 100000,
                 },
               },
             },
@@ -51,12 +49,15 @@ const GroupChart = () => {
   );
 
   const handleGetData = useCallback(async () => {
+    if (!lastBlock) {
+      return;
+    }
     const sellQuery = getQueryByType('SellAddress.keyword');
     const buyQuery = getQueryByType('BuyAddress.keyword');
     const [res1, res2] = await Promise.all([
       axios.post(
         'https://time-machine.es.asia-southeast1.gcp.elastic-cloud.com:9243/swaps_new/_search',
-        { ...query },
+        { ...sellQuery },
         {
           auth: {
             username: 'elastic',
@@ -76,13 +77,14 @@ const GroupChart = () => {
         }
       ),
     ]);
-    if (res2.data.hits.total.value != 0 || res1.data.hits.total.value != 0) {
-      setDataPie({
-        totalBuy: res2.data.hits.total.value,
-        totalSell: res1.data.hits.total.value,
-      });
-    }
-  }, [getQueryByType]);
+
+    setDataPie({
+      totalBuy: res2.data.hits.total.value,
+      totalSell: res1.data.hits.total.value,
+    });
+  }, [getQueryByType, lastBlock]);
+
+  console.log({ lastBlock });
 
   useEffect(() => {
     handleGetData();
@@ -98,6 +100,7 @@ const GroupChart = () => {
           placeholder="Select amount"
           borderRadius="12px"
           borderColor="#2F414F"
+          defaultValue={OPTION_AMOUNT[0].value}
         >
           {OPTION_AMOUNT.map(option => {
             return (
@@ -111,6 +114,7 @@ const GroupChart = () => {
           placeholder="Select time"
           borderRadius="12px"
           borderColor="#2F414F"
+          defaultValue={OPTION_TIME[0].value}
         >
           {OPTION_TIME.map(option => {
             return (

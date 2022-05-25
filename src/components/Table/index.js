@@ -25,7 +25,7 @@ const TableWrapper = ({ data, heightCustom }) => {
             <Th>Price USD</Th>
             <Th>Rate</Th>
             <Th>Address</Th>
-            <Th>DATE</Th>
+            <Th>Date</Th>
           </Tr>
         </Thead>
         <Tbody>
