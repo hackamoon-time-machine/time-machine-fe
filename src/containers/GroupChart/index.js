@@ -58,7 +58,6 @@ const GroupChart = () => {
           password: 'nQV5AQb4xLKgkQk09WpVk3VX',
         },
       };
-      console.log('call');
       const [res1, res2] = await Promise.all([
         axios.post(
           URL,
@@ -76,23 +75,6 @@ const GroupChart = () => {
         ),
       ]);
 
-      let listBuys = [];
-      if (params.amount !== 'token') {
-        const topBuyes = res2.data.aggregations.top_buyers.buckets.slice(0, 3);
-        const totalCountTop = topBuyes.reduce(
-          (acc, cur) => acc + cur.doc_count,
-          0
-        );
-
-        listBuys = [
-          ...topBuyes,
-          {
-            key: 'Other',
-            doc_count:
-              Number(res2.data.hits.total.value) - Number(totalCountTop),
-          },
-        ];
-      }
       setDataPie({
         totalBuy:
           params.amount !== 'token'
@@ -102,7 +84,6 @@ const GroupChart = () => {
           params.amount !== 'token'
             ? res1.data.hits.total.value
             : res1.data.aggregations.total.value,
-        listBuys,
       });
     } catch (e) {
       console.log(e);

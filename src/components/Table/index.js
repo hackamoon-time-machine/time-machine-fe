@@ -21,21 +21,27 @@ const TableWrapper = ({ data, heightCustom }) => {
 
   return (
     <TableContainer height={heightCustom}>
-      <Table size="sm" color="white.200">
+      <Table
+        size="sm"
+        color="white.200"
+        variant="unstyled"
+        w="100%"
+        style={{ tableLayout: 'fixed', display: 'block' }}
+      >
         <Thead>
-          <Tr>
-            <Th>Type</Th>
-            <Th>Amount</Th>
-            <Th>Price USD</Th>
-            <Th>Rate</Th>
-            <Th>Address</Th>
-            <Th>Date</Th>
+          <Tr color="dark.200">
+            <Th w="10%">Type</Th>
+            <Th w="20%">Amount</Th>
+            <Th w="20%">Price USD</Th>
+            <Th w="15%">Rate</Th>
+            <Th w="15%">Address</Th>
+            <Th w="20%">Date</Th>
           </Tr>
         </Thead>
         <Tbody>
           {sliceData.length === 0 && (
             <Tr>
-              <Td colSpan={6} textAlign="center">
+              <Td colSpan={6} textAlign="center" h="200px">
                 No data
               </Td>
             </Tr>
