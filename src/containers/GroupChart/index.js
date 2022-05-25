@@ -1,7 +1,7 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import PieChart from 'containers/PieChart';
 import BarGroupChart from 'containers/BarChart';
-import { Box, Heading, Select, HStack, Button } from '@chakra-ui/react';
+import { Box, Heading, Select, HStack } from '@chakra-ui/react';
 import {
   OPTION_AMOUNT,
   OPTION_TIME,
@@ -31,14 +31,17 @@ const GroupChart = () => {
     totalSell: 0,
   });
 
+  const [dataBar, setDataBar] = useState({ sellData: [], buyData: [] });
+
   const getQueryByType = useCallback(
-    type => {
+    (type, typeBar) => {
       return getQueryByTypeUtil(
         type,
         params.amount,
         params.time,
         lastBlock,
-        token
+        token,
+        typeBar
       );
     },
     [params, lastBlock, token]
@@ -49,8 +52,8 @@ const GroupChart = () => {
       return;
     }
     try {
-      const sellQuery = getQueryByType(SELL_KEY);
-      const buyQuery = getQueryByType(BUY_KEY);
+      const sellQuery = getQueryByType(SELL_KEY, 'pie');
+      const buyQuery = getQueryByType(BUY_KEY, 'pie');
 
       const configAuth = {
         auth: {
@@ -75,6 +78,12 @@ const GroupChart = () => {
         ),
       ]);
 
+      let topBuy;
+      let topSell;
+      if (params.amount !== 'token') {
+        topBuy = res2.data.aggregations.top_buyers.buckets[0].doc_count;
+        topSell = res1.data.aggregations.top_buyers.buckets[0].doc_count;
+      }
       setDataPie({
         totalBuy:
           params.amount !== 'token'
@@ -84,16 +93,62 @@ const GroupChart = () => {
           params.amount !== 'token'
             ? res1.data.hits.total.value
             : res1.data.aggregations.total.value,
+        topBuy,
+        topSell,
       });
     } catch (e) {
       console.log(e);
     }
   }, [getQueryByType, lastBlock, params.amount]);
 
+  const handleGetDataBarChart = useCallback(async () => {
+    if (!lastBlock) {
+      return;
+    }
+    try {
+      const sellQuery = getQueryByType(SELL_KEY, 'bar');
+      const buyQuery = getQueryByType(BUY_KEY, 'bar');
+
+      const configAuth = {
+        auth: {
+          username: 'elastic',
+          password: 'nQV5AQb4xLKgkQk09WpVk3VX',
+        },
+      };
+      const [res1, res2] = await Promise.all([
+        axios.post(
+          URL,
+          { ...sellQuery },
+          {
+            ...configAuth,
+          }
+        ),
+        axios.post(
+          URL,
+          { ...buyQuery },
+          {
+            ...configAuth,
+          }
+        ),
+      ]);
+
+      setDataBar({
+        sellData: res1.data.aggregations.total_over_time.buckets || [],
+        buyData: res2.data.aggregations.total_over_time.buckets || [],
+      });
+    } catch (e) {
+      console.log(e);
+    }
+  }, [getQueryByType, lastBlock]);
+
   // first call
   useEffect(() => {
     handleGetData();
   }, [handleGetData]);
+
+  useEffect(() => {
+    handleGetDataBarChart();
+  }, [handleGetDataBarChart]);
 
   return (
     <Box>
@@ -105,6 +160,7 @@ const GroupChart = () => {
           placeholder="Select amount"
           borderRadius="12px"
           borderColor="#2F414F"
+          w="180px"
           value={params.amount}
           onChange={e => setParams({ ...params, amount: e.target.value })}
         >
@@ -120,6 +176,7 @@ const GroupChart = () => {
           placeholder="Select time"
           borderRadius="12px"
           borderColor="#2F414F"
+          w="140px"
           value={params.time}
           onChange={e => {
             setParams({ ...params, time: e.target.value });
@@ -133,13 +190,12 @@ const GroupChart = () => {
             );
           })}
         </Select>
-        <Button color="#fff" bg="dark.500" p={4} onClick={handleGetData}>
-          Filter
-        </Button>
       </HStack>
 
       <PieChart data={dataPie} />
-      <BarGroupChart />
+      {!!dataBar?.sellData?.length && !!dataBar?.buyData?.length && (
+        <BarGroupChart data={dataBar} type={params.amount} />
+      )}
     </Box>
   );
 };

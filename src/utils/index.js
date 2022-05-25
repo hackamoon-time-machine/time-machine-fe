@@ -6,7 +6,63 @@ export const ellipsis = (string, start = 6, end = 4) => {
   )}`;
 };
 
-export const getQueryByType = (type, amount, time, lastBlock, token) => {
+export const getQueryByType = (
+  type,
+  amount,
+  time,
+  lastBlock,
+  token,
+  typeBar
+) => {
+  if (typeBar === 'bar') {
+    return {
+      query: {
+        bool: {
+          filter: [
+            {
+              term: {
+                [type]: token,
+              },
+            },
+            {
+              range: {
+                BlockNumber: {
+                  gte: lastBlock - time,
+                },
+              },
+            },
+          ],
+        },
+      },
+      size: 0,
+      aggs: {
+        total_over_time: {
+          histogram: {
+            field: 'BlockNumber',
+            interval: time / 7,
+          },
+          aggs: {
+            sum: {
+              sum: {
+                field: type === SELL_KEY ? 'SellAmount' : 'BuyAmount',
+              },
+            },
+            max: {
+              max: {
+                field: 'BlockNumber',
+              },
+            },
+            min: {
+              min: {
+                field: 'BlockNumber',
+              },
+            },
+          },
+        },
+      },
+    };
+  }
+
   if (amount === 'token') {
     return {
       query: {

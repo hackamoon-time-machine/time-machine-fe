@@ -3,7 +3,7 @@ import React from 'react';
 import { Bar } from 'react-chartjs-2';
 import 'chart.js/auto';
 
-const BarGroupChart = () => {
+const BarGroupChart = ({ data: dataBar, type }) => {
   const options = {
     plugins: {
       legend: {
@@ -33,33 +33,33 @@ const BarGroupChart = () => {
     },
   };
 
-  const labels = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-  ];
+  const labels =
+    dataBar?.sellData.map(e => `${e.min.value}-${e.max.value}`) || [];
 
   const data = {
     labels,
     datasets: [
       {
-        label: 'Dataset 3',
-        data: labels.map(() => Math.random(0, 20)),
-        backgroundColor: '#1DE9B6',
+        label: 'Buy',
+        data:
+          type === 'token'
+            ? dataBar.buyData.map(e => e.sum.value)
+            : dataBar.buyData.map(e => e.doc_count),
+        backgroundColor: '#FF6E40',
         stack: 'Stack 1',
       },
       {
-        label: 'Dataset 1',
-        data: labels.map(() => Math.random(0, 20)),
-        backgroundColor: '#FF6E40',
+        label: 'Sell',
+        data:
+          type === 'token'
+            ? dataBar.sellData.map(e => e.sum.value)
+            : dataBar.sellData.map(e => e.doc_count),
+        backgroundColor: '#1DE9B6',
         stack: 'Stack 0',
       },
     ],
   };
+
   return <Bar options={options} data={data} />;
 };
 
